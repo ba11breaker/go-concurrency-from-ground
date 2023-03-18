@@ -1,15 +1,21 @@
 package main
 
 func main() {
-	go a()
-	go b()
+	ch := make(chan int)
+	go a(ch)
+
+	go b(ch)
 	// prevent the program from terminating, ignore for now
-	// select {}
+	select {
+	case value := <-ch:
+		println(value + 1)
+	}
 }
 
-func a() {
-	go aa()
-	go ab()
+func a(ch chan int) {
+	println("a before")
+	ch <- 5
+	println("a after")
 }
 
 func aa() {
@@ -20,9 +26,10 @@ func ab() {
 	println("ab")
 }
 
-func b() {
-	go ba()
-	go bb()
+func b(ch chan int) {
+	println(<-ch)
+	println("b before")
+	println("b after")
 }
 
 func ba() {
