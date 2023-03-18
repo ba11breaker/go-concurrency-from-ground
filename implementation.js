@@ -15,19 +15,38 @@ function run() {
 }
 
 function make() {
-
+  return new Channel();
 }
 
 function len() {
-
+  return 0;
 }
 
 function cap() {
-
+  return 0;
 }
 
 function send(channel, value, callback) {
+  // "A send on a nil channel blocks forever."
+  if (!channel) {
+    WaitingQueue.total += 1;
+    return;
+  }
 
+  // "A send on a closed channel proceeds by causing a run-time panic."
+  if (channel.closed) {
+    throw new Exception("<----- send on closed channel")
+  }
+
+  // "A send on an unbuffered channel can proceed if a receiver is ready."
+  if (channel.waiting_to_recv && channel.waiting_to_recv.list.length > 0) {
+    const receiver = channel.waiting_to_recv.deuqeue()
+    go(callback)
+    go(() => receiver(value, true));
+    return;
+  }
+
+  channel.waiting_to_send.enqueue({value, callback});
 }
 
 function recv(channel, callback) {

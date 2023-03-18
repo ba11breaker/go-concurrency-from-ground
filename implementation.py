@@ -14,13 +14,33 @@ def run():
     pass
 
 def make():
-  pass
+    return Channel()
+
 def len(channel):
-  pass
+    return 0
+
 def cap(channel):
-  pass
+    return 0
+
 def send(channel, value, callback):
-  pass
+    # "A send on a nil channel blocks forever."
+    if channel is None:
+        WaitingQueue.total += 1
+        return
+
+    # "A send on a closed channel proceeds by causing a run-time panic."
+    if  channel.closed:
+        raise Exception("<----- send on closed channel")
+
+    # "A send on an unbuffered channel can proceed if a receiver is ready."
+    if channel.waiting_to_recv:
+        receiver = channel.waiting_to_recv.dequeue()
+        go(callback)
+        go(lambda: receiver(value, True))
+        return 
+
+    channel.waiting_to_send.enqueue((value, callback))
+
 def recv(channel, callback):
   pass
 def close(channel):
