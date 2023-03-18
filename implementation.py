@@ -1,7 +1,18 @@
+execution_queue = []
+
 def go(callback):
-  pass
+    if callback:
+        execution_queue.append(callback)
+    pass
+
 def run():
-  pass
+    while execution_queue:
+        f = execution_queue.pop(0)
+        f()
+    if WaitingQueue.total > 0:
+        raise Exception("<----- fatal error: all goroutines are asleep")
+    pass
+
 def make():
   pass
 def len(channel):
@@ -22,7 +33,8 @@ default = object()
 class Channel:
     def __init__(self):
         self.closed = False
-        self.waiting_to_send = 
+        self.waiting_to_send = WaitingQueue()
+        self.waiting_to_recv = WaitingQueue()
 
 class WaitingQueue(list):
     total = 0
